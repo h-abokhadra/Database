@@ -1,0 +1,116 @@
+--group by 
+SELECT department_id  ,count(*)
+FROM hr.employees e
+GROUP by department_id
+
+select job_id ,count(*)
+From hr.employees e
+group by job_id
+
+---- show the number of employee for department name as IT 
+SELECT department_name,count(*) as "No Of emp" ,round( AVG(salary),2) as "avergae salary"
+FROM  hr.employees e
+INNER JOIN hr.departments d
+ON d.department_id = e.department_id
+WHERE upper(department_name) in('IT','SHIPPING')
+GROUP by  department_name
+
+select * from hr.departments
+
+------------------------------------
+SELECT department_name,count(*) as "No Of emp" ,round( AVG(salary),2) as "avergae salary"
+FROM  hr.employees e
+INNER JOIN hr.departments d
+ON d.department_id = e.department_id
+WHERE upper(department_name) in('IT','SHIPPING','SALES')
+GROUP by  department_name
+having count(*) >10
+
+
+------ROLLUP
+SELECT region_name, country_name, location_id, COUNT(*)
+  FROM hr.regions r 
+  JOIN hr.countries c 
+    ON r.region_id = c.region_id
+  JOIN hr.locations l
+    ON c.country_id = l.country_id
+ GROUP BY region_name, country_name, location_id
+ ORDER BY 1,2;
+
+
+
+SELECT region_name ,Country_name ,location_id,COUNT(*)
+  FROM hr.regions r 
+  JOIN hr.countries c 
+    ON r.region_id = c.region_id
+  JOIN hr.locations l
+    ON c.country_id = l.country_id
+ GROUP BY ROLLUP(region_name,country_name,location_id)
+ ORDER BY region_name,country_name;
+ 
+ 
+ -------------------------------------------------------------
+ --03.03. Hierarchical Queries 
+ select *  FROM  hr.employees e
+ 
+ --who is Den's manager
+  select e.manager_id,e.first_name,e.last_name,e.employee_id
+  FROM  hr.employees e 
+  where first_name='Den'
+ 
+ Select *  FROM  hr.employees e  where employee_id=100
+ 
+ select e.first_name ,m.first_name,m.last_name
+ from hr.employees e 
+ join  hr.employees m
+ ON m.employee_id=e.manager_id
+ where e.first_name='Den'
+ -------------------------------------
+ select first_name ,last_name,level
+ from hr.employees e 
+ where level in(1,2,3,4)
+ CONNECT BY PRIOR manager_id=employee_id
+ START WITH first_name='Hermann'
+ 
+ 
+ select * From hr.employees
+ where first_name='Lex'
+ 
+ ---Using employee table in HR database return the names of the employees 
+ --who are directly and indirectly managed by Lex. 
+ SELECT first_name,last_name,level
+ from hr.employees e 
+ WHERE level >1
+ CONNECT BY  PRIOR employee_id =manager_id
+ START WITH first_name='Lex'
+ 
+ ------Analytical function
+ --below is teh example of simple group by 
+ SELECT employee_id, department_id, 
+    COUNT(*) AS dept_count
+  FROM hr.employees
+ WHERE department_id IN (20, 30)
+ GROUP BY department_id,employee_id;
+
+ --Below is the exampl eof analytical function
+ SELECT employee_id,department_id, 
+    COUNT(*) OVER (PARTITION BY department_id) as dep_count
+  FROM hr.employees
+ WHERE department_id IN (20, 30)
+
+ SELECT employee_id,Salary, department_id, 
+    COUNT(*) OVER (PARTITION BY department_id
+                    ORDER BY SALARY) as dep_count
+FROM hr.employees
+ WHERE department_id IN (20, 30)
+
+  SELECT employee_id,Salary, department_id, sum(salary)
+   OVER (PARTITION BY department_id
+        ORDER BY employee_id
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cummulative_salary
+FROM hr.employees
+ WHERE department_id IN (60)
+ 
+ 
+ 
+ 
