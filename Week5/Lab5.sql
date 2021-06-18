@@ -1,9 +1,4 @@
-ACCEPT p_id PROMPT 'Enter Country ID'
-SELECT *
-FROM HR.countries
-WHERE country_id = '&p_id'
-
-select * from hr.locations
-ACCEPT p_id PROMPT 'ENTER REGION ID'
-select count (*)  from hr.countries
-where region _id = '&p_id'
+ACCEPT p_location_id PROMPT 'Enter location ID'
+SELECT country_id
+FROM hr.locations
+WHERE location_id = '&p_location_id'
