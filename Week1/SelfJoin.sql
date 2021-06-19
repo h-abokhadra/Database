@@ -11,6 +11,7 @@ insert into cust values(6,'Anny','Oakville');
 insert into cust values(7,'Rammy','Toronto');
 insert into cust values(8,'Zia','Toronto');
 select * from cust;
+
 SELECT distinct A.Custname AS CustomerName1, A.custCity
 FROM Cust A, Cust B
 WHERE A.Custid <> B.CustID
