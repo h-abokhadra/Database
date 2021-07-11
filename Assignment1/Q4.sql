@@ -1,8 +1,8 @@
 ALTER SESSION SET current_schema = SI;
 
-SELECT Car.carmake, Car.carmodel, SUM(servinv.laborcost) TotalLaborCost
-FROM Car JOIN servinv
-ON Car.carserial = servinv.carserial
-WHERE Car.carmake = 'Toyota'
-GROUP BY Car.carmake, Car.carmodel;
+SELECT C.carmake, C.carmodel, SUM(S.laborcost) TotalCostForLabor
+FROM Car C JOIN servinv S
+ON C.carserial = S.carserial
+WHERE C.carmake = 'Toyota'
+GROUP BY C.carmake, C.carmodel;
 

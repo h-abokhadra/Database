@@ -1,3 +1,5 @@
+ALTER SESSION SET current_schema = SI;
+
 SELECT custname,
 CASE COUNT(carserial)
                             WHEN 1 
