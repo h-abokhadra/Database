@@ -1,0 +1,218 @@
+SET serveroutput on;
+DECLARE 
+    v_num1 NUMBER := &p_num1;
+    v_num2 NUMBER := &p_num2;
+BEGIN
+    IF v_num1 > v_num2 THEN 
+        DBMS_OUTPUT.PUT_LINE(v_num1 || 'is greater than' || v_num2);
+    ELSIF v_num1 < v_num2 THEN 
+        DBMS_OUTPUT.PUT_LINE(v_num1 || 'is less  than' || v_num2);
+    ELSE    
+        DBMS_OUTPUT.PUT_LINE(v_num1 || 'is equal to' || v_num2);
+    END IF;    
+END;
+------------------------
+--CASE 
+DECLARE
+    a NUMBER := 4;
+BEGIN
+    CASE a
+        WHEN 1 THEN 
+            DBMS_OUTPUT.PUT_LINE('value 1');
+       WHEN 2 THEN     
+            DBMS_OUTPUT.PUT_LINE('value 2');
+       WHEN 3 THEN 
+            DBMS_OUTPUT.PUT_LINE('value 3');
+       ELSE 
+            DBMS_OUTPUT.PUT_LINE('no matching case found');
+            DBMS_OUTPUT.NEW_LINE();
+            DBMS_OUTPUT.PUT_LINE('hello');
+        END CASE;
+END;
+-------------------------
+---loops
+SET serveroutput on;
+DECLARE
+    v_num NUMBER:=10;
+BEGIN    
+    LOOP 
+        v_num := v_num+10;
+        EXIT WHEN v_num>100;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('v_num   ' || v_num);
+END;    
+
+---WHILE
+DECLARE
+    v_num NUMBER:=10;
+BEGIN    
+    WHILE v_num<100
+    LOOP 
+        v_num := v_num+10;        
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('v_num   ' || v_num);
+END;    
+---FOR LOOP
+DECLARE
+    v_num NUMBER;
+BEGIN    
+    FOR i IN REVERSE 1..10
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('value of i   ' || i);
+    END LOOP;    
+END;   
+--------------------------------
+select * from HR.employees
+ACCEPT p_id PROMPT 'ENter Employee Id :';
+DECLARE
+    v_fname VARCHAR(50);
+    v_lname VARCHAR2(50);
+    v_email VARCHAR(50);
+    v_PHONE VARCHAR(50);
+    v_jobID VARCHAR(20);
+BEGIN
+    SELECT first_name,last_name,email,phone_number,job_id
+    INTO v_fname,v_lname,v_email,v_PHONE,v_jobID
+    FROM HR.employees
+    WHERE employee_id=&p_id; 
+    DBMS_OUTPUT.PUT_LINE('information is ' || v_fname || '      ' ||v_lname|| '      ' || v_email
+    || '    ' ||v_PHONE|| '    ' || v_jobID );
+END;
+---------------------
+--%TYPE
+    ACCEPT p_id PROMPT 'ENter Employee Id :';
+DECLARE
+    v_fname hr.employees.first_name%TYPE; 
+    v_lname hr.employees.last_name%TYPE;
+    v_email hr.employees.email%TYPE;
+    v_PHONE hr.employees.phone_number%TYPE;
+    v_jobID hr.employees.job_id%TYPE;
+BEGIN
+    SELECT first_name,last_name,email,phone_number,job_id
+    INTO v_fname,v_lname,v_email,v_PHONE,v_jobID
+    FROM HR.employees
+    WHERE employee_id=&p_id; 
+    DBMS_OUTPUT.PUT_LINE('information is ' || v_fname || '      ' ||v_lname|| '      ' || v_email
+    || '    ' ||v_PHONE|| '    ' || v_jobID );
+END;
+
+--------- 
+----Variables for Holding the whole record
+   ACCEPT p_id PROMPT 'ENter Employee Id :';
+DECLARE
+    v_employee hr.employees%ROWTYPE;
+BEGIN
+    SELECT *
+    INTO v_employee
+    FROM HR.employees
+    WHERE employee_id=&p_id; 
+    
+    DBMS_OUTPUT.PUT_LINE('information is ' || v_employee.first_name || '      ' ||v_employee.last_name|| '      ' ||
+    v_employee.email     || '    ' ||v_employee.phone_number|| '    ' || v_employee.job_id );
+   
+END;
+
+--------\\\
+--user defined variable type
+ ACCEPT p_id PROMPT 'ENter Employee Id :';
+DECLARE
+   TYPE emp_record IS RECORD
+   (
+    v_fname hr.employees.first_name%TYPE, 
+    v_lname hr.employees.last_name%TYPE,
+    v_email hr.employees.email%TYPE
+   );
+   e_emp_record emp_record;
+BEGIN
+    SELECT first_name,last_name ,email
+    INTO e_emp_record
+    FROM HR.employees
+    WHERE employee_id=&p_id; 
+    
+    DBMS_OUTPUT.PUT_LINE('information is ' || e_emp_record.v_fname || '      ' ||e_emp_record.v_lname|| '      ' ||
+    e_emp_record.v_email     );
+   
+END;
+-------
+SELECT *
+    FROM HR.employees
+---cursor to show 10% increase on the salary
+--
+DECLARE
+    v_name hr.employees.first_name%TYPE;
+    v_salary hr.employees.salary%TYPE;
+    CURSOR c_empInfo IS 
+    SELECT first_name ,salary 
+    FROM HR.employees
+    where department_id=90;
+BEGIN
+    OPEN c_empInfo;
+    LOOP
+        FETCH c_empInfo into v_name,v_salary;
+        EXIT WHEN c_empInfo%NOTFOUND;
+         DBMS_OUTPUT.PUT_LINE('information is : name: ' || v_name || '  ' || v_salary || '   ' ||
+         ' salary with 10%increase '  || (v_salary*1.10));
+    END LOOP;
+    CLOSE c_empInfo;
+END;
+
+------
+select * From ot.customers where customer_id= 4;
+select * From OT.orders order by order_id;
+select order_id,quantity,unit_price,(quantity*unit_price) as total  From OT.order_items order by order_id
+
+DECLARE 
+    v_name ot.customers.name%TYPE;
+    v_total NUMBER(10,2);
+    v_grandTotal NUMBER(10,2);
+    
+    CURSOR c_cust_orders IS
+    SELECT c.name ,(OI.quantity*OI.unit_price) as total 
+    FROM OT.customers c
+    JOIN ot.orders O on c.customer_id= O.customer_id
+    JOIN ot.order_items OI on O.order_id = OI.order_id
+    WHERE c.customer_id=4 and OI.order_id = 1;
+BEGIN
+    v_grandTotal := 0;
+    OPEN c_cust_orders;
+        LOOP
+            FETCH c_cust_orders INTO v_name,v_total;
+            EXIT WHEN c_cust_orders%NOTFOUND;
+            v_grandTotal := v_grandTotal +v_total;
+        END LOOP;
+    CLOSE c_cust_orders;
+    
+     DBMS_OUTPUT.PUT_LINE('GRAND TOTLA IS '  || v_grandTotal);
+END;
+
+-----
+----Cursor with FOR LOOP
+DECLARE 
+
+    v_grandTotal NUMBER(10,2);
+    
+    CURSOR c_cust_orders IS
+    SELECT c.name ,(OI.quantity*OI.unit_price) as total 
+    FROM OT.customers c
+    JOIN ot.orders O on c.customer_id= O.customer_id
+    JOIN ot.order_items OI on O.order_id = OI.order_id
+    WHERE c.customer_id=4 and OI.order_id = 1;
+BEGIN
+    v_grandTotal := 0;
+   
+       FOR v_orders IN c_cust_orders
+        LOOP
+             v_grandTotal := v_grandTotal +v_orders.total;
+        END LOOP;
+   
+    
+     DBMS_OUTPUT.PUT_LINE('GRAND TOTLA IS '  || v_grandTotal);
+END;
+
+
+
+
+
+
+
+-
